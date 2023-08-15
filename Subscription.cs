@@ -2,10 +2,10 @@
 {
     public class Subscription
     {
-        public string SubscriptionName { get; set; }
+        public string? SubscriptionName { get; set; }
         public bool IsOwned { get; set; }
         public int? OwnedIndex { get; set; }
-        public List<SubscriptionData> SubscriptionDataList { get; set; } // Subscription type, price per billing period
+        public List<SubscriptionData>? SubscriptionDataList { get; set; } // Subscription type, price per billing period
 
         public static SubscriptionType? PromptSubscriptionType(string header)
         {
@@ -59,7 +59,7 @@
     public enum SubscriptionType
     {
         Monthly, // 1 Month
-        TriMonthly, // 3 Month
+        Quarterly, // 3 Month
         Yearly // 12 Month
     }
 
@@ -70,7 +70,7 @@
             return type switch
             {
                 SubscriptionType.Monthly => "Monthly",
-                SubscriptionType.TriMonthly => "Tri-Monthly",
+                SubscriptionType.Quarterly => "Quarterly",
                 SubscriptionType.Yearly => "Yearly",
                 _ => "Monthly",
             };
@@ -81,7 +81,7 @@
             return type switch
             {
                 "Monthly" => SubscriptionType.Monthly,
-                "Tri-Monthly" => SubscriptionType.TriMonthly,
+                "Quarterly" => SubscriptionType.Quarterly,
                 "Yearly" => SubscriptionType.Yearly,
                 _ => SubscriptionType.Monthly,
             };
@@ -89,13 +89,13 @@
 
         public static double ToPriceType(this SubscriptionData subData, SubscriptionType targetType)
         {
-            double priceAsMonthly = 0;
+            double priceAsMonthly;
 
             // get any subscription type down to a monthly
             priceAsMonthly = subData.SubscriptionType switch
             {
                 SubscriptionType.Monthly => subData.Price,
-                SubscriptionType.TriMonthly => subData.Price / 3,
+                SubscriptionType.Quarterly => subData.Price / 3,
                 SubscriptionType.Yearly => subData.Price / 12,
                 _ => subData.Price,
             };
@@ -104,8 +104,8 @@
             return targetType switch
             {
                 SubscriptionType.Monthly => priceAsMonthly,
-                SubscriptionType.TriMonthly => (priceAsMonthly * 3),
-                SubscriptionType.Yearly => (priceAsMonthly * 12),
+                SubscriptionType.Quarterly => priceAsMonthly * 3,
+                SubscriptionType.Yearly => priceAsMonthly * 12,
                 _ => priceAsMonthly,
             };
         }

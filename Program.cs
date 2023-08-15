@@ -5,7 +5,7 @@ namespace SubscriptionCalculator
 {
     internal class Program
     {
-        private static List<Subscription> SubscriptionsList { get; set; }
+        private static List<Subscription>? SubscriptionsList { get; set; }
 
         public static T LoadJsonFromFile<T>(string path)
         {
@@ -27,7 +27,7 @@ namespace SubscriptionCalculator
             File.WriteAllText(path, json);
         }
 
-        static void Main(string[] args)
+        static void Main()
         {
             SubscriptionsList = LoadJsonFromFile<List<Subscription>>("subscriptions.json");
 
@@ -125,7 +125,7 @@ namespace SubscriptionCalculator
                 }
             }
 
-            SubscriptionsList.Add(subscription);
+            SubscriptionsList!.Add(subscription);
         }
 
         static void RemoveSubscription()
@@ -134,7 +134,7 @@ namespace SubscriptionCalculator
             Console.Write("What subscription would you like to remove? (or press enter to exit) ");
             string subscription = Console.ReadLine()!;
 
-            if (subscription == null || subscription == "" || subscription == " " || SubscriptionsList.Find(pred => pred.SubscriptionName == subscription) == null)
+            if (subscription == null || subscription == "" || subscription == " " || SubscriptionsList!.Find(pred => pred.SubscriptionName == subscription) == null)
                 return;
 
             SubscriptionsList.Remove(SubscriptionsList.Find(pred => pred.SubscriptionName == subscription)!);
@@ -158,14 +158,14 @@ namespace SubscriptionCalculator
                     Console.Clear();
                     Console.WriteLine("Owned Subscriptions: ");
                     Console.WriteLine();
-                    foreach (Subscription sub in SubscriptionsList)
+                    foreach (Subscription sub in SubscriptionsList!)
                     {
                         if (!sub.IsOwned)
                         {
                             continue;
                         }
 
-                        SubscriptionData subData = sub.SubscriptionDataList[sub.OwnedIndex!.Value];
+                        SubscriptionData subData = sub.SubscriptionDataList![sub.OwnedIndex!.Value];
                         Console.WriteLine($"  {sub.SubscriptionName}, {subData.SubscriptionType.ToFriendlyString()}");
                     }
                     Console.WriteLine();
@@ -203,14 +203,14 @@ namespace SubscriptionCalculator
             Console.WriteLine();
 
             double total = 0;
-            foreach (Subscription sub in SubscriptionsList)
+            foreach (Subscription sub in SubscriptionsList!)
             {
                 if (!sub.IsOwned)
                 {
                     continue;
                 }
 
-                SubscriptionData subData = sub.SubscriptionDataList[sub.OwnedIndex!.Value];
+                SubscriptionData subData = sub.SubscriptionDataList![sub.OwnedIndex!.Value];
                 double price = subData.ToPriceType(currentSubscriptionType);
                 Console.WriteLine($"  {price:C} ({sub.SubscriptionName}, {subData.SubscriptionType.ToComparisonString(currentSubscriptionType)})");
                 total += price;

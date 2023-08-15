@@ -82,9 +82,7 @@ namespace SubscriptionCalculator
 
             Subscription subscription = new()
             {
-                SubscriptionName = subscriptionName,
-                SubscriptionDataList = new()
-            };
+                SubscriptionName = subscriptionName,            };
 
             bool isMoreSubscriptionTypes = true;
             while (isMoreSubscriptionTypes)
@@ -93,59 +91,39 @@ namespace SubscriptionCalculator
                 Console.WriteLine("What time period of subscription is it? (Or press enter to return to the menu)");
                 Console.WriteLine();
 
-                List<string> subscriptionTypes = ((SubscriptionType[])Enum.GetValues(typeof(SubscriptionType))).Select(pred => pred.ToFriendlyString()).ToList();
-                SubscriptionType currentSubscriptionType = default;
-                SubscriptionData? currentSubscriptionData = default;
-
-                int i = 1;
-                foreach (string subscriptionTypeName in subscriptionTypes)
+                SubscriptionType currentSubscriptionType;
+                SubscriptionData? currentSubscriptionData;
+                SubscriptionType? tempSubType = Subscription.PromptSubscriptionType();
+                if (tempSubType == null)
                 {
-                    Console.WriteLine($"{i}. {subscriptionTypeName}");
-                    i++;
+                    if (subscription.SubscriptionDataList == null)
+                        return;
+
+                    isMoreSubscriptionTypes = false;
+                    continue;
                 }
 
-                ConsoleKeyInfo key = Console.ReadKey(true);
+                if (subscription.SubscriptionDataList == null)
+                    subscription.SubscriptionDataList = new();
 
-                switch (key.KeyChar)
+                currentSubscriptionType = tempSubType.Value;
+
+                Console.Write("\nWhat is the price of the subscription? ");
+                double price = double.Parse(Console.ReadLine()!);
+
+                // set some stuff (current subscription type, current subscription data), and add the current subscription data to a list
+                currentSubscriptionData = new(currentSubscriptionType, price);
+                subscription.SubscriptionDataList.Add(currentSubscriptionData);
+
+                // ask if owned, if y, set the owned flag to true and the ownedindex to the indexof currentsubscriptiondata
+                Console.Write("Do you own this subscription type? (y/N) ");
+
+                ConsoleKeyInfo doesOwn = Console.ReadKey(true);
+                switch ($"{doesOwn.KeyChar}".ToLower())
                 {
-                    // if output isnt really anything, break out of the switch case and set the loop variable to false
-                    case (char)13:
-                    case '\0':
-                    case ' ':
-                        isMoreSubscriptionTypes = false;
-                        break;
-
-                    // otherwise, continue down further
-                    default:
-                        Console.Write("\nWhat is the price of the subscription? ");
-                        double price = double.Parse(Console.ReadLine()!);
-                        i = 1;
-                        // for every subscription type
-                        foreach (string subscriptionTypeName in subscriptionTypes)
-                        {
-                            // if i is the same as the pressed character
-                            if (key.KeyChar == i.ToString().ToCharArray().Single())
-                            {
-                                // set some stuff (current subscription type, current subscription data), and add the current subscription data to a list
-                                currentSubscriptionType = subscriptionTypeName.ToSubscriptionType();
-                                currentSubscriptionData = new(currentSubscriptionType, price);
-                                subscription.SubscriptionDataList.Add(currentSubscriptionData);
-
-                                // ask if owned, if y, set the owned flag to true and the ownedindex to the indexof currentsubscriptiondata
-                                Console.Write("Do you own this subscription type? (y/N) ");
-
-                                ConsoleKeyInfo doesOwn = Console.ReadKey(true);
-                                switch ($"{doesOwn.KeyChar}".ToLower())
-                                {
-                                    case "y":
-                                        subscription.IsOwned = true;
-                                        subscription.OwnedIndex = subscription.SubscriptionDataList.IndexOf(currentSubscriptionData!);
-                                        break;
-                                }
-                            }
-                            i++;
-                        }
-
+                    case "y":
+                        subscription.IsOwned = true;
+                        subscription.OwnedIndex = subscription.SubscriptionDataList.IndexOf(currentSubscriptionData);
                         break;
                 }
             }
@@ -220,34 +198,17 @@ namespace SubscriptionCalculator
             Console.WriteLine("What billing period would you like to view your prices as?");
             Console.WriteLine();
 
-            List<string> subscriptionTypes = ((SubscriptionType[])Enum.GetValues(typeof(SubscriptionType))).Select(pred => pred.ToFriendlyString()).ToList();
-            SubscriptionType currentSubType = default;
+            SubscriptionType currentSubscriptionType = default;
+            SubscriptionType? tempSubType = Subscription.PromptSubscriptionType();
+            if (tempSubType == null) // if they want to leave, return
+                return;
 
-            int i = 1;
-            foreach (string subscriptionTypeName in subscriptionTypes)
-            {
-                Console.WriteLine($"{i}. {subscriptionTypeName}");
-                i++;
-            }
-
-            ConsoleKeyInfo subType = Console.ReadKey(true);
-
-            i = 1;
-            // for every subscription type
-            foreach (string subscriptionTypeName in subscriptionTypes)
-            {
-                // if i is the same as the pressed character
-                if (subType.KeyChar == i.ToString().ToCharArray().Single())
-                {
-                    // set current subscription type
-                    currentSubType = subscriptionTypeName.ToSubscriptionType();
-                }
-                i++;
-            }
+            currentSubscriptionType = tempSubType.Value;
 
             Console.Clear();
-            Console.WriteLine($"Subscriptions as {currentSubType.ToFriendlyString()}: ");
+            Console.WriteLine($"Subscriptions as {currentSubscriptionType.ToFriendlyString()}: ");
             Console.WriteLine();
+
             double total = 0;
             foreach (Subscription sub in SubscriptionsList)
             {
@@ -257,10 +218,11 @@ namespace SubscriptionCalculator
                 }
 
                 SubscriptionData subData = sub.SubscriptionDataList[sub.OwnedIndex!.Value];
-                double price = subData.ToPriceType(currentSubType);
-                Console.WriteLine($"  {price:C} ({sub.SubscriptionName}, {subData.SubscriptionType.ToComparisonString(currentSubType)})");
+                double price = subData.ToPriceType(currentSubscriptionType);
+                Console.WriteLine($"  {price:C} ({sub.SubscriptionName}, {subData.SubscriptionType.ToComparisonString(currentSubscriptionType)})");
                 total += price;
             }
+
             Console.WriteLine("----------");
             Console.WriteLine($"Total: {total:C}");
             Console.WriteLine();

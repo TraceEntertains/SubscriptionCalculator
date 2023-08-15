@@ -6,6 +6,38 @@
         public bool IsOwned { get; set; }
         public int? OwnedIndex { get; set; }
         public List<SubscriptionData> SubscriptionDataList { get; set; } // Subscription type, price per billing period
+
+        public static SubscriptionType? PromptSubscriptionType()
+        {
+            // get a list of every subscription type
+            SubscriptionType[] subscriptionTypes = (SubscriptionType[])Enum.GetValues(typeof(SubscriptionType));
+
+            // list all subscription types
+            int i = 1;
+            foreach (SubscriptionType subscriptionType in subscriptionTypes)
+            {
+                Console.WriteLine($"{i}. {subscriptionType.ToFriendlyString()}");
+                i++;
+            }
+
+            // read a key for finding the subscription type
+            ConsoleKeyInfo subType = Console.ReadKey(true);
+
+            i = 1;
+            // for every subscription type
+            foreach (SubscriptionType subscriptionType in subscriptionTypes)
+            {
+                // if i is the same as the pressed character (because of how i was used earlier)
+                if (subType.KeyChar == i.ToString().ToCharArray().Single())
+                {
+                    // return the subscription type
+                    return subscriptionType;
+                }
+                i++;
+            }
+
+            return null;
+        }
     }
 
     public class SubscriptionData

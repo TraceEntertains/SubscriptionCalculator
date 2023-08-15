@@ -7,8 +7,12 @@
         public int? OwnedIndex { get; set; }
         public List<SubscriptionData> SubscriptionDataList { get; set; } // Subscription type, price per billing period
 
-        public static SubscriptionType? PromptSubscriptionType()
+        public static SubscriptionType? PromptSubscriptionType(string header)
         {
+            Console.Clear();
+            Console.WriteLine(header);
+            Console.WriteLine();
+
             // get a list of every subscription type
             SubscriptionType[] subscriptionTypes = (SubscriptionType[])Enum.GetValues(typeof(SubscriptionType));
 

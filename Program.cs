@@ -82,18 +82,16 @@ namespace SubscriptionCalculator
 
             Subscription subscription = new()
             {
-                SubscriptionName = subscriptionName,            };
+                SubscriptionName = subscriptionName,
+            };
 
             bool isMoreSubscriptionTypes = true;
             while (isMoreSubscriptionTypes)
             {
-                Console.Clear();
-                Console.WriteLine("What time period of subscription is it? (Or press enter to return to the menu)");
-                Console.WriteLine();
-
                 SubscriptionType currentSubscriptionType;
                 SubscriptionData? currentSubscriptionData;
-                SubscriptionType? tempSubType = Subscription.PromptSubscriptionType();
+
+                SubscriptionType? tempSubType = Subscription.PromptSubscriptionType("What time period of subscription is it? (Or press enter to return to the menu)");
                 if (tempSubType == null)
                 {
                     if (subscription.SubscriptionDataList == null)
@@ -103,8 +101,7 @@ namespace SubscriptionCalculator
                     continue;
                 }
 
-                if (subscription.SubscriptionDataList == null)
-                    subscription.SubscriptionDataList = new();
+                subscription.SubscriptionDataList ??= new();
 
                 currentSubscriptionType = tempSubType.Value;
 
@@ -194,12 +191,8 @@ namespace SubscriptionCalculator
 
         static void CalculateTotal()
         {
-            Console.Clear();
-            Console.WriteLine("What billing period would you like to view your prices as?");
-            Console.WriteLine();
-
-            SubscriptionType currentSubscriptionType = default;
-            SubscriptionType? tempSubType = Subscription.PromptSubscriptionType();
+            SubscriptionType currentSubscriptionType;
+            SubscriptionType? tempSubType = Subscription.PromptSubscriptionType("What billing period would you like to view your prices as?");
             if (tempSubType == null) // if they want to leave, return
                 return;
 
